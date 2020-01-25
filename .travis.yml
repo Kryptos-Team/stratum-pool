@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+- '0.10'
+- '4'
+- '5'
+- '6'
+- '7'
+- '8'
+- '9'
+- '10'
+
+deploy:
+  provider: npm
+  email: desk.abhimanyu@gmail.com
+  api_key:
+    secure: kKsE9wmQEGD6VyGX66DjYguvcBKt85RXIMl5b7EwmGhgcyJtKm4a9xuukoIq+znKzIUtqdpvbqREgAwUaOJVBhxXf5z6LTvkVUiDXZ8M+emT5MwRg0PiIZv5hSyoY2g6tJ6s9DuPlHpoGWOTF7d/N5Gu6+9mYpUbus8Ss/59DQj+lTJxfh+C4Iaqqz6PRH+m5u7frnE9YE83HVA5C8QxC5m0Ht09HS66Q1290HQ6FI/q3h7DY+ps5nZBXl/WMq85nFr/APdwDQr6+/ZJVp2J+xgb0iPpFJmNXKkRlutv+XAatyv2w0hgXvoxp67NqZ/DFbUb6cP4P/jPMlGWR/I4y8cddF9wa7AybQoz4vKhjjyW7Obw/JO44aXgSs7PnLsNBBwUInF74cUG0P55XtBOERZEwS58wSyWUmPmhSmV8OUdzz1r5wzUxomvc9pMtxn9DuvENB6UK9JR7BVCCeaWJHjcvLLNPoEo9aiSIPiXnjrDMdmmw4UFw6T1hFdIscLMI4VUQpQLskfrAWO+slAnFR8ABWz4ijrO/qGHzYUT9TNI3kHoX3midukuP9Gpup4alH3AoighcIIYZaVJH9COrI6rnufpPIteridGl3Pxp1d146GNL9rk9O60xuzqPMRHExwwsgRaLpAKweFenI9Jt87InMua7JenjUkqr3MsE8U=

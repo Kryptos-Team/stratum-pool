@@ -1,0 +1,34 @@
+{
+  "name": "kryptos-stratum-pool",
+  "version": "1.0.0",
+  "description": "High performance stratus pool server",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kryptos-Team/stratum-pool.git"
+  },
+  "keywords": [
+    "stratus",
+    "mining",
+    "pool",
+    "server",
+    "poolserver",
+    "bitcoin",
+    "litecoin",
+    "scrypt"
+  ],
+  "author": "Abhimanyu Saharan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kryptos-Team/stratum-pool/issues"
+  },
+  "homepage": "https://github.com/Kryptos-Team/stratum-pool#readme",
+  "dependencies": {
+    "async": "^3.1.1",
+    "base58-native": "^0.1.4",
+    "bignum": "^0.13.1",
+    "kryptos-multi-hashing": "0.0.1"
+  },
+  "engines": {
+    "node": ">=0.10"
+  }
+}
