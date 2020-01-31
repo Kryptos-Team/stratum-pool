@@ -1,5 +1,5 @@
 var bignum = require('bignum');
-var multiHashing = require('multi-hashing');
+var multiHashing = require('kryptos-multi-hashing');
 var util = require('./util.js');
 
 var diff1 = global.diff1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000;
