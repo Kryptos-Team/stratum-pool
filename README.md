@@ -364,3 +364,4 @@ To support development of this project feel free to donate :)
 * BTC: `3542EMxkgirJBbWN33NqUCPhZ89vvjeWsR`
 * LTC: `LTSsbhiP3nAUanq7cPbGXfDNuxPr8VMvv1`
 * XMR: `8BqPZB339MkZaJ7SLSW31vJ9zqdfL5YTTHYVrVU2i11newcLyXmnBoy5Ku72xzMrEta6hoVhymVZxesVvaR2knAR9qXxfRx`
+* Paypal: `https://www.paypal.me/abhimanyusaharan`
