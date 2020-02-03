@@ -525,7 +525,7 @@ var pool = module.exports = function pool(options, authorizeFn){
                 emitWarningLog('Socket error from ' + client.getLabel() + ': ' + JSON.stringify(err));
 
             }).on('socketTimeout', function(reason){
-                emitWarningLog('Connected timed out for ' + client.getLabel() + ': ' + reason)
+                emitWarningLog('Connection timed out for ' + client.getLabel() + ': ' + reason)
 
             }).on('socketDisconnect', function() {
                 //emitLog('Socket disconnected from ' + client.getLabel());
