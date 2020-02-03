@@ -1,6 +1,6 @@
 {
   "name": "kryptos-stratum-pool",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "High performance stratus pool server",
   "repository": {
     "type": "git",
