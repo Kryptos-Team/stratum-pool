@@ -11,6 +11,6 @@ exports.varDiff = require('./src/varDiff.js');
 
 
 exports.createPool = function (poolOptions, authorizeFn) {
-    var newPool = new pool(poolOptions, authorizeFn);
-    return newPool;
+	var newPool = new pool(poolOptions, authorizeFn);
+	return newPool;
 };

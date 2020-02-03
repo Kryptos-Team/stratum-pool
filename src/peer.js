@@ -1,229 +1,225 @@
-var net = require('net');
-var crypto = require('crypto');
-var events = require('events');
+let net = require('net');
+let crypto = require('crypto');
+let events = require('events');
 
-var util = require('./util.js');
+let util = require('./util.js');
 
 
 //Example of p2p in node from TheSeven: http://paste.pm/e54.js
 
 
-var fixedLenStringBuffer = function(s, len) {
-    var buff = new Buffer(len);
-    buff.fill(0);
-    buff.write(s);
-    return buff;
+let fixedLenStringBuffer = function (s, len) {
+	let buff = new Buffer(len);
+	buff.fill(0);
+	buff.write(s);
+	return buff;
 };
 
-var commandStringBuffer = function (s) {
-    return fixedLenStringBuffer(s, 12);
+let commandStringBuffer = function (s) {
+	return fixedLenStringBuffer(s, 12);
 };
 
 /* Reads a set amount of bytes from a flowing stream, argument descriptions:
-   - stream to read from, must have data emitter
-   - amount of bytes to read
-   - preRead argument can be used to set start with an existing data buffer
-   - callback returns 1) data buffer and 2) lopped/over-read data */
-var readFlowingBytes = function (stream, amount, preRead, callback) {
+ - stream to read from, must have data emitter
+ - amount of bytes to read
+ - preRead argument can be used to set start with an existing data buffer
+ - callback returns 1) data buffer and 2) lopped/over-read data */
+let readFlowingBytes = function (stream, amount, preRead, callback) {
 
-    var buff = preRead ? preRead : new Buffer([]);
+	let buff = preRead ? preRead : new Buffer([]);
 
-    var readData = function (data) {
-        buff = Buffer.concat([buff, data]);
-        if (buff.length >= amount) {
-            var returnData = buff.slice(0, amount);
-            var lopped = buff.length > amount ? buff.slice(amount) : null;
-            callback(returnData, lopped);
-        }
-        else
-            stream.once('data', readData);
-    };
+	let readData = function (data) {
+		buff = Buffer.concat([buff, data]);
+		if (buff.length >= amount) {
+			let returnData = buff.slice(0, amount);
+			let lopped = buff.length > amount ? buff.slice(amount) : null;
+			callback(returnData, lopped);
+		} else
+			stream.once('data', readData);
+	};
 
-    readData(new Buffer([]));
+	readData(new Buffer([]));
 };
 
-var Peer = module.exports = function (options) {
+let Peer = module.exports = function (options) {
 
-    var _this = this;
-    var client;
-    var magic = new Buffer(options.testnet ? options.coin.peerMagicTestnet : options.coin.peerMagic, 'hex');
-    var magicInt = magic.readUInt32LE(0);
-    var verack = false;
-    var validConnectionConfig = true;
+	let _this = this;
+	let client;
+	let magic = new Buffer(options.testnet ? options.coin.peerMagicTestnet : options.coin.peerMagic, 'hex');
+	let magicInt = magic.readUInt32LE(0);
+	let verack = false;
+	let validConnectionConfig = true;
 
-    //https://en.bitcoin.it/wiki/Protocol_specification#Inventory_Vectors
-    var invCodes = {
-        error: 0,
-        tx: 1,
-        block: 2
-    };
-    
-    var networkServices = new Buffer('0100000000000000', 'hex'); //NODE_NETWORK services (value 1 packed as uint64)
-    var emptyNetAddress = new Buffer('010000000000000000000000000000000000ffff000000000000', 'hex');
-    var userAgent = util.varStringBuffer('/node-stratum/');
-    var blockStartHeight = new Buffer('00000000', 'hex'); //block start_height, can be empty
+	//https://en.bitcoin.it/wiki/Protocol_specification#Inventory_Vectors
+	let invCodes = {
+		error: 0,
+		tx: 1,
+		block: 2
+	};
 
-    //If protocol version is new enough, add do not relay transactions flag byte, outlined in BIP37
-    //https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki#extensions-to-existing-messages
-    var relayTransactions = options.p2p.disableTransactions === true ? new Buffer([false]) : new Buffer([]);
+	let networkServices = new Buffer('0100000000000000', 'hex'); //NODE_NETWORK services (value 1 packed as uint64)
+	let emptyNetAddress = new Buffer('010000000000000000000000000000000000ffff000000000000', 'hex');
+	let userAgent = util.varStringBuffer('/node-stratum/');
+	let blockStartHeight = new Buffer('00000000', 'hex'); //block start_height, can be empty
 
-    var commands = {
-        version: commandStringBuffer('version'),
-        inv: commandStringBuffer('inv'),
-        verack: commandStringBuffer('verack'),
-        addr: commandStringBuffer('addr'),
-        getblocks: commandStringBuffer('getblocks')
-    };
+	//If protocol version is new enough, add do not relay transactions flag byte, outlined in BIP37
+	//https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki#extensions-to-existing-messages
+	let relayTransactions = options.p2p.disableTransactions === true ? new Buffer([false]) : new Buffer([]);
 
-
-    (function init() {
-        Connect();
-    })();
+	let commands = {
+		version: commandStringBuffer('version'),
+		inv: commandStringBuffer('inv'),
+		verack: commandStringBuffer('verack'),
+		addr: commandStringBuffer('addr'),
+		getblocks: commandStringBuffer('getblocks')
+	};
 
 
-    function Connect() {
-
-        client = net.connect({
-            host: options.p2p.host,
-            port: options.p2p.port
-        }, function () {
-            SendVersion();
-        });
-        client.on('close', function () {
-            if (verack) {
-                _this.emit('disconnected');
-                verack = false;
-                Connect();
-            }
-            else if (validConnectionConfig)
-                _this.emit('connectionRejected');
-
-        });
-        client.on('error', function (e) {
-            if (e.code === 'ECONNREFUSED') {
-                validConnectionConfig = false;
-                _this.emit('connectionFailed');
-            }
-            else
-                _this.emit('socketError', e);
-        });
+	(function init() {
+		Connect();
+	})();
 
 
-        SetupMessageParser(client);
+	function Connect() {
 
-    }
+		client = net.connect({
+			host: options.p2p.host,
+			port: options.p2p.port
+		}, function () {
+			SendVersion();
+		});
+		client.on('close', function () {
+			if (verack) {
+				_this.emit('disconnected');
+				verack = false;
+				Connect();
+			} else if (validConnectionConfig)
+				_this.emit('connectionRejected');
 
-    function SetupMessageParser(client) {
-
-        var beginReadingMessage = function (preRead) {
-
-            readFlowingBytes(client, 24, preRead, function (header, lopped) {
-                var msgMagic = header.readUInt32LE(0);
-                if (msgMagic !== magicInt) {
-                    _this.emit('error', 'bad magic number from peer');
-                    while (header.readUInt32LE(0) !== magicInt && header.length >= 4) {
-                        header = header.slice(1);
-                    }
-                    if (header.readUInt32LE(0) === magicInt) {
-                        beginReadingMessage(header);
-                    } else {
-                        beginReadingMessage(new Buffer([]));
-                    }
-                    return;
-                }
-                var msgCommand = header.slice(4, 16).toString();
-                var msgLength = header.readUInt32LE(16);
-                var msgChecksum = header.readUInt32LE(20);
-                readFlowingBytes(client, msgLength, lopped, function (payload, lopped) {
-                    if (util.sha256d(payload).readUInt32LE(0) !== msgChecksum) {
-                        _this.emit('error', 'bad payload - failed checksum');
-                        beginReadingMessage(null);
-                        return;
-                    }
-                    HandleMessage(msgCommand, payload);
-                    beginReadingMessage(lopped);
-                });
-            });
-        };
-
-        beginReadingMessage(null);
-    }
+		});
+		client.on('error', function (e) {
+			if (e.code === 'ECONNREFUSED') {
+				validConnectionConfig = false;
+				_this.emit('connectionFailed');
+			} else
+				_this.emit('socketError', e);
+		});
 
 
-    //Parsing inv message https://en.bitcoin.it/wiki/Protocol_specification#inv
-    function HandleInv(payload) {
-        //sloppy varint decoding
-        var count = payload.readUInt8(0);
-        payload = payload.slice(1);
-        if (count >= 0xfd)
-        {
-            count = payload.readUInt16LE(0);
-            payload = payload.slice(2);
-        }
-        while (count--) {
-            switch(payload.readUInt32LE(0)) {
-                case invCodes.error:
-                    break;
-                case invCodes.tx:
-                    var tx = payload.slice(4, 36).toString('hex');
-                    break;
-                case invCodes.block:
-                    var block = payload.slice(4, 36).toString('hex');
-                    _this.emit('blockFound', block);
-                    break;
-            }
-            payload = payload.slice(36);
-        }
-    }
+		SetupMessageParser(client);
 
-    function HandleMessage(command, payload) {
-        _this.emit('peerMessage', {command: command, payload: payload});
-        switch (command) {
-            case commands.inv.toString():
-                HandleInv(payload);
-                break;
-            case commands.verack.toString():
-                if(!verack) {
-                    verack = true;
-                    _this.emit('connected');
-                }
-                break;
-            case commands.version.toString():
-                SendMessage(commands.verack, Buffer.alloc(0));
-                break;
-            default:
-                break;
-        }
+	}
 
-    }
+	function SetupMessageParser(client) {
 
-    //Message structure defined at: https://en.bitcoin.it/wiki/Protocol_specification#Message_structure
-    function SendMessage(command, payload) {
-        var message = Buffer.concat([
-            magic,
-            command,
-            util.packUInt32LE(payload.length),
-            util.sha256d(payload).slice(0, 4),
-            payload
-        ]);
-        client.write(message);
-        _this.emit('sentMessage', message);
-    }
+		let beginReadingMessage = function (preRead) {
 
-    function SendVersion() {
-        var payload = Buffer.concat([
-            util.packUInt32LE(options.protocolVersion),
-            networkServices,
-            util.packInt64LE(Date.now() / 1000 | 0),
-            emptyNetAddress, //addr_recv, can be empty
-            emptyNetAddress, //addr_from, can be empty
-            crypto.pseudoRandomBytes(8), //nonce, random unique ID
-            userAgent,
-            blockStartHeight,
-            relayTransactions
-        ]);
-        SendMessage(commands.version, payload);
-    }
+			readFlowingBytes(client, 24, preRead, function (header, lopped) {
+				let msgMagic = header.readUInt32LE(0);
+				if (msgMagic !== magicInt) {
+					_this.emit('error', 'bad magic number from peer');
+					while (header.readUInt32LE(0) !== magicInt && header.length >= 4) {
+						header = header.slice(1);
+					}
+					if (header.readUInt32LE(0) === magicInt) {
+						beginReadingMessage(header);
+					} else {
+						beginReadingMessage(new Buffer([]));
+					}
+					return;
+				}
+				let msgCommand = header.slice(4, 16).toString();
+				let msgLength = header.readUInt32LE(16);
+				let msgChecksum = header.readUInt32LE(20);
+				readFlowingBytes(client, msgLength, lopped, function (payload, lopped) {
+					if (util.sha256d(payload).readUInt32LE(0) !== msgChecksum) {
+						_this.emit('error', 'bad payload - failed checksum');
+						beginReadingMessage(null);
+						return;
+					}
+					HandleMessage(msgCommand, payload);
+					beginReadingMessage(lopped);
+				});
+			});
+		};
+
+		beginReadingMessage(null);
+	}
+
+
+	//Parsing inv message https://en.bitcoin.it/wiki/Protocol_specification#inv
+	function HandleInv(payload) {
+		//sloppy varint decoding
+		let count = payload.readUInt8(0);
+		payload = payload.slice(1);
+		if (count >= 0xfd) {
+			count = payload.readUInt16LE(0);
+			payload = payload.slice(2);
+		}
+		while (count--) {
+			switch (payload.readUInt32LE(0)) {
+				case invCodes.error:
+					break;
+				case invCodes.tx:
+					let tx = payload.slice(4, 36).toString('hex');
+					break;
+				case invCodes.block:
+					let block = payload.slice(4, 36).toString('hex');
+					_this.emit('blockFound', block);
+					break;
+			}
+			payload = payload.slice(36);
+		}
+	}
+
+	function HandleMessage(command, payload) {
+		_this.emit('peerMessage', {command: command, payload: payload});
+		switch (command) {
+			case commands.inv.toString():
+				HandleInv(payload);
+				break;
+			case commands.verack.toString():
+				if (!verack) {
+					verack = true;
+					_this.emit('connected');
+				}
+				break;
+			case commands.version.toString():
+				SendMessage(commands.verack, Buffer.alloc(0));
+				break;
+			default:
+				break;
+		}
+
+	}
+
+	//Message structure defined at: https://en.bitcoin.it/wiki/Protocol_specification#Message_structure
+	function SendMessage(command, payload) {
+		let message = Buffer.concat([
+			magic,
+			command,
+			util.packUInt32LE(payload.length),
+			util.sha256d(payload).slice(0, 4),
+			payload
+		]);
+		client.write(message);
+		_this.emit('sentMessage', message);
+	}
+
+	function SendVersion() {
+		let payload = Buffer.concat([
+			util.packUInt32LE(options.protocolVersion),
+			networkServices,
+			util.packInt64LE(Date.now() / 1000 | 0),
+			emptyNetAddress, //addr_recv, can be empty
+			emptyNetAddress, //addr_from, can be empty
+			crypto.pseudoRandomBytes(8), //nonce, random unique ID
+			userAgent,
+			blockStartHeight,
+			relayTransactions
+		]);
+		SendMessage(commands.version, payload);
+	}
 
 };
 
